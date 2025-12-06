@@ -1,68 +1,24 @@
+import streamlit as st
 import pywhatkit
-import tkinter as tk
-from tkinter import messagebox
-import threading
 
-def ابعت_الرسالة():
-    رقم = حقل_الرقم.get().strip()
-    رسالة = حقل_الرسالة.get("1.0", "end-1c").strip()
-    
+st.set_page_config(page_title="واتساب بوت", page_icon="📱")
+
+st.title("واتساب بوت برو")
+st.write("ابعت رسايل واتساب أوتوماتيك من أي مكان!")
+
+رقم = st.text_input("الرقم مع كود الدولة", placeholder="+201234567890")
+رسالة = st.text_area("الرسالة", height=150)
+
+if st.button("إرسال الرسالة", use_container_width=True):
     if not رقم or not رسالة:
-        messagebox.showwarning("ناقص بيانات", "اكتب الرقم والرسالة الأول!")
-        return
-    
-    if not رقم.startswith('+'):
-        messagebox.showerror("خطأ في الرقم", "لازم الرقم يبدأ بـ +20 أو +966 إلخ")
-        return
-    
-    زر_الإرسال.config(text="جاري الإرسال...", state="disabled")
-    
-    def شغل_الإرسال():
-        try:
-            pywhatkit.sendwhatmsg_instantly(رقم, رسالة, wait_time=15, tab_close=True, close_time=5)
-            messagebox.showinfo("نجح!", f"تم إرسال الرسالة بنجاح إلى\n{رقم}")
-            
-            # مسح الحقول + إرجاع الكيرسور لحقل الرقم
-            حقل_الرقم.delete(0, "end")
-            حقل_الرسالة.delete("1.0", "end")
-            حقل_الرقم.focus()   # الكيرسور يرجع للرقم تلقائي
-            
-        except Exception as e:
-            messagebox.showerror("حصل خطأ", f"فشل الإرسال:\n{e}")
-        finally:
-            زر_الإرسال.config(text="إرسال الرسالة", state="normal")
-    
-    threading.Thread(target=شغل_الإرسال, daemon=True).start()
-
-# إنشاء النافذة الرئيسية
-نافذة = tk.Tk()
-نافذة.title("واتساب بوت برو - إرسال أوتوماتيك")
-نافذة.geometry("500x650")
-نافذة.configure(bg="#128C7E")
-نافذة.resizable(False, False)
-
-# العنوان
-tk.Label(نافذة, text="واتساب بوت برو", font=("Arial", 22, "bold"), bg="#128C7E", fg="white").pack(pady=20)
-
-# حقل الرقم
-tk.Label(نافذة, text="الرقم مع كود الدولة (+20...)", font=("Arial", 12), bg="#128C7E", fg="white").pack()
-حقل_الرقم = tk.Entry(نافذة, font=("Arial", 16), width=30, justify="center", bd=3, relief="solid")
-حقل_الرقم.pack(pady=10)
-
-# حقل الرسالة
-tk.Label(نافذة, text="الرسالة", font=("Arial", 12), bg="#128C7E", fg="white").pack()
-حقل_الرسالة = tk.Text(نافذة, font=("Arial", 14), height=10, width=45, bd=3, relief="solid")
-حقل_الرسالة.pack(pady=10)
-
-# زر الإرسال
-زر_الإرسال = tk.Button(نافذة, text="إرسال الرسالة", font=("Arial", 18, "bold"),
-                         bg="#25D366", fg="white", height=2, width=20,
-                         activebackground="#1DA851", cursor="hand2",
-                         command=ابعت_الرسالة)
-زر_الإرسال.pack(pady=20)
-
-# التوقيع في الأسفل
-tk.Label(نافذة, text="تم التطوير بواسطة أسطورة بايثون 🐍", font=("Arial", 10), bg="#128C7E", fg="yellow").pack(side="bottom", pady=15)
-
-# تشغيل البرنامج
-نافذة.mainloop()
+        st.error("اكتب الرقم والرسالة!")
+    elif not رقم.startswith('+'):
+        st.error("الرقم لازم يبدأ بـ +20")
+    else:
+        with st.spinner("جاري الإرسال..."):
+            try:
+                pywhatkit.sendwhatmsg_instantly(رقم, رسالة, wait_time=15, tab_close=True, close_time=5)
+                st.success(f"تم الإرسال إلى {رقم} ✅")
+                st.balloons()
+            except:
+                st.error("حصل خطأ، جرب تاني")
